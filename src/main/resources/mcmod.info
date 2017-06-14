@@ -1,0 +1,21 @@
+[
+ {
+   "modid": "restriction",
+   "name": "Restriction",
+   "description": "Disables right click functionality under configurable circumstances",
+   "version": "0.0.1",
+   "mcversion": "1.10.2",
+   "url": "",
+   "updateUrl": "",
+   "authorList": [
+     "davqvist"
+   ],
+   "credits": "",
+   "logoFile": "",
+   "screenshots": [
+   ],
+   "parent":"",
+   "dependencies": [
+   ]
+ }
+ ]
