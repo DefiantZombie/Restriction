@@ -1,5 +1,7 @@
 package com.davqvist.restriction.handler;
 
+import com.davqvist.restriction.Restriction;
+import com.davqvist.restriction.config.RestrictionReader;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,14 +27,29 @@ public class RightClickHandler {
         if( player != null && !player.isCreative() && !event.isCanceled() && pos != null ){
             IBlockState state = world.getBlockState( event.getPos() );
             if( state != null ){
-                if( state.getBlock() == Blocks.BED ){
-                    if( canSeeSky( pos, world ) ) {
-                        cancelRightClick( event, "Bed isn't allowed to see the sky.");
-                    }
-                }
-                if( state.getBlock() == Blocks.FURNACE || state.getBlock() == Blocks.LIT_FURNACE ){
-                    if( !isInRoom( pos, world, Blocks.STONE, 40 ) ){
-                        cancelRightClick( event, "Furnace must be in closed room made out of at least 40 Stone.");
+                for( RestrictionReader.RestrictionBlock block : Restriction.proxy.rr.root.entries ){
+                    if( ( block.ignoreMeta && state.getBlock() == Block.getBlockFromName( block.block ) ) || Block.isEqualTo( state.getBlock(), Block.getBlockFromName( block.block ) ) ){
+                        for( RestrictionReader.RestrictionDesciptor desc : block.restrictions ){
+                            if( desc.type == RestrictionReader.RestrictionType.SEESKY ){
+                                if( canSeeSky( pos, world ) == desc.reverse ) {
+                                    cancelRightClick( event, "Block must " + (desc.reverse?"not ":"") + "see the sky.");
+                                }
+                            }
+                            if( desc.type == RestrictionReader.RestrictionType.CLOSEDROOM ){
+                                if( desc.size == null ){ desc.size = 0; }
+                                if( desc.amount == null ){ desc.amount = 0; }
+                                if( desc.block != null ){
+                                    if( isInRoom( pos, world, desc.size, Block.getBlockFromName( desc.block ), desc.amount ) == desc.reverse ){
+                                        cancelRightClick(event, "Block must " + (desc.reverse ? "not " : "") + "be in closed room" + (desc.size > 0 ? " with a size of at least " + desc.size + " blocks" : "")
+                                                                            + (desc.block != null ? " made out of at least "+desc.amount+" "+Block.getBlockFromName( desc.block ).getLocalizedName():"")+".");
+                                    }
+                                } else {
+                                    if( isInRoom( pos, world, desc.size ) == desc.reverse ){
+                                        cancelRightClick(event, "Block must " + (desc.reverse ? "not " : "") + "be in closed room" + (desc.size > 0 ? " with a size of at least " + desc.size + " blocks." : "."));
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
