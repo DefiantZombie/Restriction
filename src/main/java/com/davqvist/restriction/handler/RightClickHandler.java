@@ -6,9 +6,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.fml.common.eventhandler.Event;
@@ -28,7 +31,7 @@ public class RightClickHandler {
             IBlockState state = world.getBlockState( event.getPos() );
             if( state != null ){
                 for( RestrictionReader.RestrictionBlock block : Restriction.proxy.rr.root.entries ){
-                    if( ( block.ignoreMeta && state.getBlock() == Block.getBlockFromName( block.block ) ) || Block.isEqualTo( state.getBlock(), Block.getBlockFromName( block.block ) ) ){
+                    if( ( block.ignoreMeta && Block.isEqualTo( state.getBlock(), Block.getBlockFromName( block.block ) ) || state == Block.getBlockFromName( block.block ).getStateFromMeta( block.meta ) ) ){
                         for( RestrictionReader.RestrictionDesciptor desc : block.restrictions ){
                             if( desc.type == RestrictionReader.RestrictionType.SEESKY ){
                                 if( canSeeSky( pos, world ) == desc.reverse ) {
@@ -39,9 +42,17 @@ public class RightClickHandler {
                                 if( desc.size == null ){ desc.size = 0; }
                                 if( desc.amount == null ){ desc.amount = 0; }
                                 if( desc.block != null ){
-                                    if( isInRoom( pos, world, desc.size, Block.getBlockFromName( desc.block ), desc.amount ) == desc.reverse ){
-                                        cancelRightClick(event, "Block must " + (desc.reverse ? "not " : "") + "be in closed room" + (desc.size > 0 ? " with a size of at least " + desc.size + " blocks" : "")
-                                                                            + (desc.block != null ? " made out of at least "+desc.amount+" "+Block.getBlockFromName( desc.block ).getLocalizedName():"")+".");
+                                    if( desc.ignoreMeta ) {
+                                        if( isInRoom( pos, world, desc.size, Block.getBlockFromName( desc.block ), desc.amount ) == desc.reverse ){
+                                            cancelRightClick( event, "Block must " + (desc.reverse ? "not " : "") + "be in closed room" + (desc.size > 0 ? " with a size of at least " + desc.size + " blocks" : "")
+                                                    + (desc.block != null ? " made out of at least " + desc.amount + " " + Block.getBlockFromName( desc.block ).getLocalizedName() : "") + ".");
+                                        }
+                                    } else{
+                                        if( isInRoom( pos, world, desc.size, Block.getBlockFromName( desc.block ).getStateFromMeta( desc.meta ), desc.amount ) == desc.reverse ){
+                                            ItemStack temp = new ItemStack( Item.getItemFromBlock( Block.getBlockFromName( desc.block ) ), 1, desc.meta );
+                                            cancelRightClick( event, "Block must " + (desc.reverse ? "not " : "") + "be in closed room" + (desc.size > 0 ? " with a size of at least " + desc.size + " blocks" : "")
+                                                    + (desc.block != null ? " made out of at least " + desc.amount + " " + temp.getDisplayName() : "") + ".");
+                                        }
                                     }
                                 } else {
                                     if( isInRoom( pos, world, desc.size ) == desc.reverse ){
@@ -75,12 +86,12 @@ public class RightClickHandler {
         return !solid;
     }
 
-    private boolean isInRoom( BlockPos pos, World world, int minSize, Block block, int minBlock ){
+    private boolean isInRoom( BlockPos pos, World world, int minSize, Object block, int minBlock ){
         Stack<BlockPos> stack = new Stack<BlockPos>();
         stack.push( pos );
         final int maxSize = 10000;
-        int blockCount = 0;
         final HashSet<BlockPos> addableBlocks = new HashSet<BlockPos>();
+        final HashSet<BlockPos> foundBlocks = new HashSet<BlockPos>();
 
         while( !stack.isEmpty() ) {
             BlockPos stackElement = stack.pop();
@@ -91,15 +102,15 @@ public class RightClickHandler {
                     if( addableBlocks.size() <= maxSize ){
                         if( !world.getBlockState( searchNextPosition ).getBlock().isBlockSolid( world, searchNextPosition, direction.getOpposite() )) {
                             stack.push( searchNextPosition );
-                        } else if( block != null && world.getBlockState( searchNextPosition ).getBlock() == block ){
-                            blockCount++;
+                        } else if( block != null && ( ( block instanceof Block && world.getBlockState( searchNextPosition ).getBlock() == block ) || ( block instanceof IBlockState && world.getBlockState( searchNextPosition ) == block ) ) && !foundBlocks.contains( searchNextPosition ) ){
+                            foundBlocks.add( searchNextPosition );
                         }
                     }
                     else{ return false; }
                 }
             }
         }
-        return( addableBlocks.size() > minSize && blockCount >= minBlock );
+        return( addableBlocks.size() > minSize && foundBlocks.size() >= minBlock );
     }
 
     private boolean isInRoom( BlockPos pos, World world ){
@@ -110,7 +121,7 @@ public class RightClickHandler {
         return isInRoom( pos, world, minSize, null, 0 );
     }
 
-    private boolean isInRoom( BlockPos pos, World world, Block block, int minBlock ){
+    private boolean isInRoom( BlockPos pos, World world, Object block, int minBlock ){
         return isInRoom( pos, world, 0, block, minBlock );
     }
 }
