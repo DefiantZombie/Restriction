@@ -70,8 +70,8 @@ public class RightClickHandler {
     private void cancelRightClick( RightClickBlock event, String message ){
         event.setUseBlock( Event.Result.DENY );
         event.setCanceled( true );
-        if( event.getEntityPlayer().worldObj.isRemote ) {
-            event.getEntityPlayer().addChatComponentMessage( new TextComponentString( message ) );
+        if( event.getEntityPlayer().world.isRemote ) {
+            event.getEntityPlayer().sendMessage( new TextComponentString( message ) );
         }
     }
 
