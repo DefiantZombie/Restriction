@@ -1,14 +1,16 @@
 package com.davqvist.restriction.proxy;
 
 import com.davqvist.restriction.config.RestrictionReader;
+import com.davqvist.restriction.handler.PlaceHandler;
 import com.davqvist.restriction.handler.RightClickHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import java.io.File;
 
-public abstract class CommonProxy {
+public abstract class CommonProxy{
 
     public RestrictionReader rr = new RestrictionReader();
 
@@ -17,11 +19,12 @@ public abstract class CommonProxy {
         if( !configdir.exists() ){
             configdir.mkdir();
         }
-        File file = new File( configdir, "restriction.json");
+        File file = new File( configdir, "restriction.json" );
         rr.readRestrictions( file );
     }
 
-    public void init( FMLInitializationEvent e ) {
+    public void init( FMLInitializationEvent e ){
         MinecraftForge.EVENT_BUS.register( new RightClickHandler() );
+        MinecraftForge.EVENT_BUS.register( new PlaceHandler() );
     }
 }
