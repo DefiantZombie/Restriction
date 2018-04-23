@@ -21,10 +21,13 @@ public class TooltipHandler{
     public void onTooltip( ItemTooltipEvent e ){
         for( RestrictionReader.RestrictionBlock rblock : Restriction.proxy.rr.root.entries ){
             Object block = UtilityHelper.getBlock( rblock.block, rblock.ignoreMeta, rblock.meta );
-            if( ( block instanceof IBlockState && Block.getBlockFromItem( e.getItemStack().getItem() ).getStateFromMeta( rblock.meta ) == block ) ||
-                ( block instanceof Block && ( ( e.getItemStack().getItem() instanceof ItemBlock && Block.isEqualTo( Block.getBlockFromItem( e.getItemStack().getItem() ), (Block) block ) ) ||
-                                            ( e.getItemStack().getItem() instanceof ItemBlockSpecial && Block.isEqualTo( ((ItemBlockSpecial) e.getItemStack().getItem()).getBlock(), (Block) block ) ) ) ) ){
-                e.getToolTip().addAll( getNotifications( rblock ) );
+            try{
+                if( e.getItemStack() != null && e.getItemStack().getItem() != null ){
+                    if( ( block instanceof IBlockState && Block.getBlockFromItem( e.getItemStack().getItem() ).getStateFromMeta( rblock.meta ) == block ) || ( block instanceof Block && ( ( e.getItemStack().getItem() instanceof ItemBlock && Block.isEqualTo( Block.getBlockFromItem( e.getItemStack().getItem() ), (Block) block ) ) || ( e.getItemStack().getItem() instanceof ItemBlockSpecial && Block.isEqualTo( ( (ItemBlockSpecial) e.getItemStack().getItem() ).getBlock(), (Block) block ) ) ) ) ){
+                        e.getToolTip().addAll( getNotifications( rblock ) );
+                    }
+                }
+            } catch( Exception ex ){
             }
         }
     }
@@ -39,13 +42,13 @@ public class TooltipHandler{
                 notification = RestrictionNotifications.getNotificationSeeSky( rdesc.reverse );
             }
             if( rdesc.type == RestrictionReader.RestrictionType.CLOSEDROOM ){
-                notification = RestrictionNotifications.getNotificationClosedRoom( rdesc.reverse, ( rdesc.size == null ? 0 : rdesc.size ), rdesc.block, rdesc.ignoreMeta, rdesc.meta, ( rdesc.amount == null ? 0 : rdesc.amount ) );
+                notification = RestrictionNotifications.getNotificationClosedRoom( rdesc.reverse, ( rdesc.size == null ? 0 : rdesc.size ), rdesc.block, rdesc.ignoreMeta, ( rdesc.meta == null ? 0 : rdesc.meta ), ( rdesc.amount == null ? 0 : rdesc.amount ), true );
             }
             if( rdesc.type == RestrictionReader.RestrictionType.DIMENSION ){
                 notification = RestrictionNotifications.getNotificationDimension( rdesc.reverse, rdesc.id );
             }
             if( rdesc.type == RestrictionReader.RestrictionType.NEARBYBLOCKS ){
-                notification = RestrictionNotifications.getNotificationNearbyBlocks( rdesc.reverse, ( rdesc.size == null ? 0 : rdesc.size ), rdesc.block, rdesc.ignoreMeta, rdesc.meta, ( rdesc.amount == null ? 0 : rdesc.amount ) );
+                notification = RestrictionNotifications.getNotificationNearbyBlocks( rdesc.reverse, ( rdesc.size == null ? 0 : rdesc.size ), rdesc.block, rdesc.ignoreMeta, ( rdesc.meta == null ? 0 : rdesc.meta ), ( rdesc.amount == null ? 0 : rdesc.amount ) );
             }
             if( rdesc.type == RestrictionReader.RestrictionType.EXPERIENCE ){
                 notification = RestrictionNotifications.getNotificationExperience( rdesc.reverse, rdesc.amount );

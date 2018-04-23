@@ -36,9 +36,9 @@ public class PlaceHandler{
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.CLOSEDROOM ){
-                                if( RestrictionHelper.isInRoom( pos, world, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
+                                if( RestrictionHelper.isInRoom( pos, world, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
                                     event.setCanceled( true );
-                                    message = RestrictionNotifications.getNotificationClosedRoom( desc.reverse, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) );
+                                    message = RestrictionNotifications.getNotificationClosedRoom( desc.reverse, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) );
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.DIMENSION ){
@@ -48,9 +48,9 @@ public class PlaceHandler{
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.NEARBYBLOCKS ){
-                                if( RestrictionHelper.isNearby( pos, world, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
+                                if( RestrictionHelper.isNearby( pos, world, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
                                     event.setCanceled( true );
-                                    message = RestrictionNotifications.getNotificationNearbyBlocks( desc.reverse, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) );
+                                    message = RestrictionNotifications.getNotificationNearbyBlocks( desc.reverse, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) );
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.EXPERIENCE ){

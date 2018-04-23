@@ -21,7 +21,7 @@ public class UtilityHelper{
 
     public static Object getBlock( String blockString, boolean ignoreMeta, int meta ){
 
-        if( blockString != null ){
+        if( blockString != null && !blockString.isEmpty() ){
             if( ignoreMeta ){
                 return Block.getBlockFromName( blockString );
             } else {

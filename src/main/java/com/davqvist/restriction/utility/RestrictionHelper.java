@@ -1,16 +1,26 @@
 package com.davqvist.restriction.utility;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDoor;
+import net.minecraft.block.BlockGlass;
+import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.HashSet;
 import java.util.Stack;
 
 public class RestrictionHelper{
+
+    public static enum LAST_IN_ROOM_ERROR_TYPE { CLOSED, SIZE, BLOCKS };
+    public static LAST_IN_ROOM_ERROR_TYPE LAST_IN_ROOM_ERROR;
+    public static int LAST_IN_ROOM_ERROR_AMOUNT = 0;
 
     public static boolean canSeeSky( BlockPos pos, World world ){
         boolean solid = false;
@@ -20,7 +30,9 @@ public class RestrictionHelper{
             if( world.getHeight() < pos.getY() ){
                 reachedtop = true;
             }
-            if( world.getBlockState( pos ).getBlock().isBlockSolid( world, pos, EnumFacing.DOWN ) ){
+            if( world.getBlockState( pos ).isSideSolid( world, pos, EnumFacing.DOWN ) ||
+                    world.getBlockState( pos ).isSideSolid( world, pos, EnumFacing.UP ) ||
+                    world.getBlockState( pos ).getBlockFaceShape( world, pos, EnumFacing.DOWN ) == BlockFaceShape.SOLID ){
                 solid = true;
             }
         }
@@ -43,18 +55,36 @@ public class RestrictionHelper{
                 BlockPos searchNextPosition = stackElement.offset( direction );
                 if( !addableBlocks.contains( searchNextPosition ) ){
                     if( addableBlocks.size() <= maxSize ){
-                        if( !world.getBlockState( searchNextPosition ).getBlock().isBlockSolid( world, searchNextPosition, direction.getOpposite() ) ){
+                        if( !world.getBlockState( searchNextPosition ).isSideSolid( world, searchNextPosition, direction.getOpposite() ) &&
+                            !world.getBlockState( searchNextPosition ).isSideSolid( world, searchNextPosition, direction ) &&
+                            world.getBlockState( searchNextPosition ).getBlockFaceShape( world, searchNextPosition, direction.getOpposite() ) != BlockFaceShape.SOLID &&
+                            !( world.getBlockState( searchNextPosition ).getBlock() instanceof BlockDoor &&
+                                !BlockDoor.isOpen( world, searchNextPosition ) &&
+                                ( BlockDoor.getFacing( world, searchNextPosition ) == direction ||
+                                    BlockDoor.getFacing( world, searchNextPosition ) == direction.getOpposite()
+                                )
+                            )
+                        ){
                             stack.push( searchNextPosition );
                         } else if( block != null && ( ( block instanceof Block && world.getBlockState( searchNextPosition ).getBlock() == block ) || ( block instanceof IBlockState && world.getBlockState( searchNextPosition ) == block ) ) && !foundBlocks.contains( searchNextPosition ) ){
                             foundBlocks.add( searchNextPosition );
                         }
                     } else {
+                        LAST_IN_ROOM_ERROR = LAST_IN_ROOM_ERROR_TYPE.CLOSED;
                         return false;
                     }
                 }
             }
         }
-        return ( addableBlocks.size() > minSize && foundBlocks.size() >= minAmount );
+        if( foundBlocks.size() < minAmount ){
+            LAST_IN_ROOM_ERROR = LAST_IN_ROOM_ERROR_TYPE.BLOCKS;
+            LAST_IN_ROOM_ERROR_AMOUNT = minAmount - foundBlocks.size();
+        }
+        if( addableBlocks.size() < minSize ){
+            LAST_IN_ROOM_ERROR = LAST_IN_ROOM_ERROR_TYPE.SIZE;
+            LAST_IN_ROOM_ERROR_AMOUNT = minSize - addableBlocks.size();
+        }
+        return ( addableBlocks.size() >= minSize && foundBlocks.size() >= minAmount );
     }
 
     public static boolean isNearby( BlockPos pos, World world, int range, String blockString, boolean ignoreMeta, int meta, int minAmount ){

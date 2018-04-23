@@ -42,8 +42,8 @@ public class RightClickHandler{
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.CLOSEDROOM ){
-                                if( RestrictionHelper.isInRoom( pos, world, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
-                                    cancelRightClick( event, RestrictionNotifications.getNotificationClosedRoom( desc.reverse, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) ) );
+                                if( RestrictionHelper.isInRoom( pos, world, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
+                                    cancelRightClick( event, RestrictionNotifications.getNotificationClosedRoom( desc.reverse, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) ) );
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.DIMENSION ){
@@ -52,8 +52,8 @@ public class RightClickHandler{
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.NEARBYBLOCKS ){
-                                if( RestrictionHelper.isNearby( pos, world, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
-                                    cancelRightClick( event, RestrictionNotifications.getNotificationNearbyBlocks( desc.reverse, ( desc.size == null ? 0 : desc.size ), desc.block, desc.ignoreMeta, desc.meta, ( desc.amount == null ? 0 : desc.amount ) ) );
+                                if( RestrictionHelper.isNearby( pos, world, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) ) == desc.reverse ){
+                                    cancelRightClick( event, RestrictionNotifications.getNotificationNearbyBlocks( desc.reverse, ( desc.size == null ? 0 : desc.size ), ( desc.block == null ? "" : desc.block ), desc.ignoreMeta, ( desc.meta == null ? 0 : desc.meta ), ( desc.amount == null ? 0 : desc.amount ) ) );
                                 }
                             }
                             if( desc.type == RestrictionReader.RestrictionType.EXPERIENCE ){
