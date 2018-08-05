@@ -8,8 +8,12 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
+import java.io.File;
+
 @Mod(modid = Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.VERSION)
 public class Restriction{
+    public static File modConfigDir;
+
     @Mod.Instance(Reference.MOD_ID)
     public static Restriction instance;
 
@@ -22,7 +26,9 @@ public class Restriction{
     }
 
     @Mod.EventHandler
-    public void preInit( FMLPreInitializationEvent event ){
+    public void preInit( FMLPreInitializationEvent event )
+    {
+        modConfigDir = event.getModConfigurationDirectory();
         proxy.preInit( event );
     }
 
